@@ -1,5 +1,20 @@
 
 function TimeLag_Table = TDOA_Module(data_Test,Fs,D_max,v,Detect_Loc,Matched_Pred_Calls)
+    % This function calculates Time Diffence of Arrival (TDOA) for the
+    % matched calls
+    %
+    % Input:
+    % 1. data_Test: the recordings
+    % 2. Fs: sampling frequency of the recordings (Hz)
+    % 3. D_max: maximum seperation distance between recorders (meters)
+    % 4. v: speed of sound (m/s)
+    % 5. Detect_Loc: table with details about each detected calls
+    % 6. Matched_Pred_Calls: table with details about the windows
+    % containing the matched calls
+    %
+    % Output:
+    % 1. TimeLag_Table: table with the TDOA for hyperbolic localization
+
     [fPath, ~, ~] = fileparts(matlab.desktop.editor.getActiveFilename);
     addpath(fPath)
     TimeLag_Table = [];

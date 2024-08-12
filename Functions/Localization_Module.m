@@ -3,7 +3,26 @@
 % Fix bugswhen increasing the number of mic/tau inputs
 
 function [cum_result_matrix,range,localization_log, Pred_Loc] = Localization_Module(tau, tau_corr, Mic, Temp, resolution, range_offset)
-
+    % This function performs hyperbolic localization using algorithm
+    % from Quail Localization paper.
+    % Input:
+    % 1. tau: TDOA values
+    % 2. tau_corr: Correlation coefficients corresponding to each TDOA
+    % values
+    % 3. Mic: Recorders' location
+    % 4. Temp: Air temperature, in degree Celcius.
+    % 5. resolution: the resolution of the accumulator matrix, in meters
+    % 6. range_offset: extensions from the corners of array, in meters 
+    % (assuming square array, will need to adjust the code for different 
+    % array's geometry)
+    % 
+    % Output:
+    % 1. cum_result_matrix: the result accumulator matrix
+    % 2. range: the range of the accumulator matrix, used to support
+    % plotting the cum_result_matrix if needed
+    % 3. localization_log: log to report about whether the localization was
+    % success or not for each matched calls.
+    % 4. Pred_Loc: list of the coordinates of the localized calls.
     
     sz = [height(tau) 3];
     varTypes = ["double","string","string"];

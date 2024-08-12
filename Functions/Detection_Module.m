@@ -1,5 +1,17 @@
 
 function [Detect_Loc, label_Pred] = Detection_Module(data_Test, Fs)
+    % This function used pretrained DL model to detect the quail calls from
+    % audio recordings
+    %
+    % Input:
+    % 1. data_Test: the audio recordings
+    % 2. Fs: sampling frequency of the inputted recordings
+    % 
+    % Output:
+    % 1. Detect_Loc: table contain details of each detected calls,
+    % formatted using Raven Pro table format to aid validation process.
+    % 2. label_Pred: 1D vector contain the detection results for each
+    % audio sample.
 
     label_Pred = cell(height(data_Test),1);
 

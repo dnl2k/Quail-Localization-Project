@@ -1,6 +1,28 @@
 
  
 function [Matched_Pred_Calls,Matched_Pred_Vec] = Matching_Module(Detect_Loc,data_Test,Fs,Temp,t_avg,t_min,t_max,D_max,min_seperation_length,epsilon)
+    % This function matched the detected calls across different recorders. 
+    % 
+    % Input: 
+    % 1. Detect_Loc: table containing details about detected calls for each
+    % recorder.
+    % 2. data_Test: the recordings from each recorder
+    % 3. Fs: sampling frequency of the recordings (Hz)
+    % 4. Temp: air temperature at the time of recording (Celsius)
+    % 5. t_avg: average call duration of the quails' calls (seconds)
+    % 6. t_min: minimum call duration of the quails' calls (seconds)
+    % 7. t_max: maximum call duration of the quails' calls (seconds)
+    % 8. D_max: maximum distance of the recorders (meters)
+    % 9. min_seperation_length: minimum duration between seperable sets of
+    % calls (seconds)
+    % 10. epsilon: minimum duration between possible windows (seconds)
+    %
+    % Output:
+    % 1. Matched_Pred_Calls: table with details about the window containing
+    % matched calls
+    % 2. Matched_Pred_Vec: 1D vector containing information about the
+    % existence of window for each sample.
+
     %-------- Find the window to match the Predicted calls
     Matched_Pred_Calls_Times = find_Suitable_Calls(Detect_Loc,Temp,t_avg,t_min,t_max,D_max);
     

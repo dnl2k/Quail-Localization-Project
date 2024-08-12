@@ -33,9 +33,10 @@ end
 
 %% Process the recordings using the detection module
 
+% Call the detection module
 [Detect_Loc, label_Pred] = Detection_Module(data_Test, Fs);
 
-%% Match the detected calls
+%% Match the detected calls using the matching module
 
 % Parameter for matching
 Temp=6;                 % Field Temperature
@@ -51,18 +52,26 @@ D_max = D_max + 2*GPS_Error;    % Calibrate GPS Error
 min_seperation_length = D_max/v*0.7;  % Minimum duration between separable sets of calls
 
 %-------------------------------%
+
+% Call the matching module
 [Matched_Pred_Calls,Matched_Pred_Vec] = Matching_Module(Detect_Loc,data_Test,Fs,Temp,t_avg,t_min,t_max,D_max,min_seperation_length,epsilon);
 
 %% Visualize one of the set of clips containing matched calls 
 
 close all
 
-for k = 1:4
+choice = 1;
+for k = 1:height(Matched_Pred_Calls) 
+    close all
+    % If choice ~= 1, sequentially display all sets
+    if choice ~= 1
+        break
+    end
     a = k;
     lt = Matched_Pred_Calls{a,"Start Time"}-1;
     ht = Matched_Pred_Calls{a,"End Time"}+1;
     
-    f = figure('Name',['Visualize set of clips #',num2str(a),': ',num2str(lt),':',num2str(ht)],'WindowState','maximized');
+    f = figure('Name',['Visualize set of clips #',num2str(a),'/',num2str(height(Matched_Pred_Calls)),': ',num2str(lt),':',num2str(ht)],'WindowState','maximized');
     pause(0.1)
     
     for i = 1:height(data_Test)
@@ -96,17 +105,36 @@ for k = 1:4
             xticklabels(num2str((lt:(ht-lt)/10:ht)'));
             xlabel('Time (s)')
         end
-        title(['Audio Sample ',num2str(lt),':',num2str(ht),', Mic#',num2str(i)])
+        title(['Audio Sample ',num2str(lt),':',num2str(ht),', Rec#',num2str(i)])
     
         legend('Predicted-Label','Matched-Pred','Location','northeastoutside')
         hold off
     
     end
+    % choice = inputdlg([ 'Displaying set ',num2str(a),'/',num2str(height(Matched_Pred_Calls)),newline,...
+    %     'Enter 1 to continue displaying sets, any other values to skip']);
+    % choice = str2double(choice{1,1});
+    if a < height(Matched_Pred_Calls)   % There are remaining sets not displayed
+        choice = questdlg(['Displaying set ',num2str(a),'/',num2str(height(Matched_Pred_Calls)),newline,...
+                           'Press continue to continue displaying sets, press skip to skip'], ...
+                           'Choice','continue','skip','continue');
+        if strcmp(choice,'continue')
+            choice = 1;
+        else
+            choice = 0;
+        end
+    else
+        f = msgbox(['Displaying set ',num2str(a),'/',num2str(height(Matched_Pred_Calls))]);
+        choice = 0;
+    end
 end
 %% Find the TDOA between the matched calls in the sets of matched clips
+%  using the TDOA module
+
+% Call the TDOA module
 TimeLag_Table = TDOA_Module(data_Test,Fs,D_max,v,Detect_Loc,Matched_Pred_Calls);
 
-%% Localize the source using TDOA
+%% Localize the source using TDOA with localization module
 
 resolution = 1;
 
@@ -129,6 +157,7 @@ Mic = [
 % 352349.67	3734585.66  % SSW
 ];
 
+% Call the localization module
 [cum_result_matrix,range,localization_log, Pred_Loc] = Localization_Module(TimeLag_Table.Lag_Table{:,:}, TimeLag_Table.Corr_Table{:,:}, Mic, Temp, resolution, range_offset);
 
 mic = [352253.61	3734845.58  % WNE
@@ -149,9 +178,6 @@ mic = [352253.61	3734845.58  % WNE
 
 figure('Name','Map');
 hold on
-
-% imagesc('XData',[range(1,1) range(2,1)],'YData',[range(1,2) range(2,2)],'CData',cum_result_matrix)
-% colorbar
 
 plot(mic(:,1),mic(:,2),'s',...
     'LineWidth',2,...
@@ -179,7 +205,6 @@ plot(Pred_Loc(:,1),Pred_Loc(:,2),'o',...
 viscircles(True_Loc,10,'Color','r','LineWidth',1)
 %-------------------------------------------------------------%
 
-range=[min(mic)-100;max(mic)+100];
 axis([range(1,1) range(2,1) range(1,2) range(2,2)]);
 axis equal
 grid on
